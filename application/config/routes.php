@@ -61,3 +61,5 @@ $route['api/memory/list'] = 'api/memory/list';
 $route['api/memory/wood_list'] = 'api/memory/wood_list';
 $route['api/memory/gu_list'] = 'api/memory/gu_list';
 $route['api/memory/theme_list'] = 'api/memory/theme_list';
+
+$route['api/memory/test'] = 'api/memory/test';

@@ -1,17 +1,18 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-use chriskacerguis\RestServer\RestController;
+use \Restserver\Libraries\REST_Controller;
 
-require APPPATH . 'libraries/RestController.php';
-require APPPATH . 'libraries/Format.php';
+require APPPATH . 'libraries/REST_Controller.php';
 
-class Memory extends RestController {
+class Memory extends REST_Controller {
 
     public function __construct()
     {
         parent::__construct();
+        $this->load->library('form_validation');
         $this->load->model('Memory_model');
+        $this->load->model('Tree_model');
     }
 
     /**
@@ -139,11 +140,74 @@ class Memory extends RestController {
 
     /**
      * 메모리 추가
+     * @param:
+     * content(String)
+     * member_id(int)
+     * wood_name(String)
+     * theme_id(int)
+     * private(int) 0~1
+     * ------------------------
      * @method: POST
      * @link: api/memory/insert
      */
     public function insert_post()
     {
+        $this->form_validation->set_rules('content', 'Content', 'required'); // 컨텐츠
+        $this->form_validation->set_rules('member_id', 'Member', 'required'); // 멤버id
+        $this->form_validation->set_rules('wood_name', 'WoodName', 'required'); // 선택 수종
+        $this->form_validation->set_rules('theme_id', 'Theme', 'required|is_natural_no_zero'); // 테마
+        $this->form_validation->set_rules('private', 'Private', 'required|in_list[0,1]'); // 공개여부(0은 공개)
 
+        if ($this->form_validation->run() == FALSE) 
+        {
+            $message = array(
+                'status' => false,
+                'error' => $this->form_validation->error_array(),
+                'message' => validation_error()
+            );
+
+            $this->response($message, REST_Controller::HTTP_NOT_FOUND);
+        }
+        else
+        {
+            $content = $this->input->post('content', TRUE);
+            $member_id = $this->input->post('member_id', TRUE);
+            $wood_name = $this->input->post('wood_name', TRUE);
+            $theme_id = $this->input->post('theme_id', TRUE);
+            $private = $this->input->post('private', TRUE);
+
+            $tree_id = $this->Tree_model->select_random_tree($wood_name);
+
+            // 해당종류의 나무가 없다면 에러 처리
+            if (!isset($tree_id->_id)) {
+                $message = array(
+                    'message' => 'select other tree'
+                );
+    
+                $this->response($message, REST_Controller::HTTP_NOT_FOUND);
+            } else {
+                $input_data = [
+                    'content' => $content,
+                    'member_id' => $member_id,
+                    'tree_id' => $tree_id->_id,
+                    'theme_id' => $theme_id,
+                    'private' => $private
+                ];
+
+                $result = $this->Memory_model->insert_post($input_data);
+
+                if ($result > 0 AND !empty($result)) {
+                    $this->response(['message' => 'posting registration success'], 200);
+                } else {
+                    $this->response(['message' => 'posting registration fail'], REST_Controller::HTTP_NOT_FOUND);
+                }
+            }
+        }
+    }
+
+    public function test_get() {
+        $result = $this->Memory_model->insert_post([]);
+
+        var_dump($result);
     }
 }

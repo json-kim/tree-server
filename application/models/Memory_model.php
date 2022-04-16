@@ -217,5 +217,45 @@ class Memory_model extends CI_Model {
 
         return $data->result_array();
     }
+
+    // 새로운 포스팅 추가
+    // tree 테이블에 입력 트리 id와 일치하는 값의 status를 1로 업데이트
+    // 업데이트에 실패하면 롤백 시키고 0 리턴
+    // 업데이트 성공시 memory 테이블에 값을 입력하고 새로 입력된 값의 id를 리턴
+    public function insert_post(array $data) {
+        $this->db->query("START TRANSACTION");
+
+        $this->db->query("
+        UPDATE tree
+        SET
+            status = 1
+        WHERE
+            _id = ".$data['tree_id']."
+        ");
+        
+        if ($this->db->affected_rows() != 1) {
+            $this->db->query("ROLLBACK");
+
+            return 0;
+        } else {
+            $this->db->query("
+            INSERT INTO memory
+                (content, tree_id, member_id, theme_id, private)
+            VALUES
+                ('".$data['content']."', ".$data['tree_id'].", ".$data['member_id'].", ".$data['theme_id'].", ".$data['private'].")
+            ");
+            $insert_id = $this->db->insert_id();
+
+            if (!empty($this->db->error()['code'])) {
+                $this->db->query("ROLLBACK");
+
+                return 0;
+            } else {
+                $this->db->query("COMMIT");
+
+                return $insert_id;
+            }
+        }
+    }
 }
 

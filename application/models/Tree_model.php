@@ -62,5 +62,25 @@ class Tree_model extends CI_Model {
 
         return $data->result_array();
     }
+
+    // 랜덤 나무 반환
+    public function select_random_tree($wood_name) {
+        $data = $this->db->query("
+        SELECT
+            _id
+        FROM
+            tree
+        WHERE
+            wood_name = '$wood_name'
+        AND
+            status = 0
+        ORDER BY
+            RAND()
+        LIMIT 1
+        ;
+        ");
+
+        return $data->row();
+    }
 }
 
