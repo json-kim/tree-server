@@ -225,7 +225,7 @@ class Memory_model extends CI_Model {
     public function insert_post(array $data) {
         $this->db->query("START TRANSACTION");
 
-        $this->db->query("
+        $update_result = $this->db->query("
         UPDATE tree
         SET
             status = 1
@@ -233,12 +233,12 @@ class Memory_model extends CI_Model {
             _id = ".$data['tree_id']."
         ");
         
-        if ($this->db->affected_rows() != 1) {
+        if (!$update_result || $this->db->affected_rows() != 1) {
             $this->db->query("ROLLBACK");
 
             return 0;
         } else {
-            $this->db->query("
+            $result = $this->db->query("
             INSERT INTO memory
                 (content, tree_id, member_id, theme_id, private)
             VALUES
@@ -246,11 +246,13 @@ class Memory_model extends CI_Model {
             ");
             $insert_id = $this->db->insert_id();
 
-            if (!empty($this->db->error()['code'])) {
+            if (!$result) {
+                // 실패시
                 $this->db->query("ROLLBACK");
 
                 return 0;
             } else {
+                // 성공시
                 $this->db->query("COMMIT");
 
                 return $insert_id;

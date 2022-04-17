@@ -53,6 +53,11 @@ $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
+$route['api/member/insert'] = 'api/member/insert';
+$route['api/member/login'] = 'api/member/login';
+$route['api/member/logout'] = 'api/member/logout';
+$route['api/member/refresh'] = 'api/member/refresh';
+
 $route['api/tree/tree_list'] = 'api/tree/tree_list';
 $route['api/tree/count'] = 'api/tree/count';
 

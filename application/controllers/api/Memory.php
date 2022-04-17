@@ -12,6 +12,7 @@ class Memory extends REST_Controller {
         parent::__construct();
         $this->load->library('form_validation');
         $this->load->model('Memory_model');
+        $this->load->model('Member_model');
         $this->load->model('Tree_model');
     }
 
@@ -22,6 +23,27 @@ class Memory extends REST_Controller {
      */
     public function list_get()
     {
+        // ********************************************
+        // 토큰 유효 체크
+        $header = $this->input->request_headers();
+        if (!isset($header['Authorization'])) {
+            // 헤더가 잘못되었을 경우
+            $this->response(['message' => 'invalid_request'], 400);
+            return;
+        }
+
+        $token = explode(' ', $header['Authorization'])[1];
+
+        $valid_check = $this->Member_model->isValidToken($token);
+
+        if (!$valid_check) {
+            // 토큰이 유효하지 않으면
+            $this->response(['message' => 'invalid token'], 401);
+            return;
+        }
+        // ********************************************
+
+
         $page = $this->input->get('page'); // 요청 페이지
         $total_count = $this->Memory_model->total_count("", "", "")->count; // 메모리 전체 개수
         $page_size = 20; // 페이지 사이즈
@@ -52,6 +74,27 @@ class Memory extends REST_Controller {
      */
     public function wood_list_get()
     {
+        // ********************************************
+        // 토큰 유효 체크
+        $header = $this->input->request_headers();
+        if (!isset($header['Authorization'])) {
+            // 헤더가 잘못되었을 경우
+            $this->response(['message' => 'invalid_request'], 400);
+            return;
+        }
+
+        $token = explode(' ', $header['Authorization'])[1];$token = $header['Authorization'];
+
+        $valid_check = $this->Member_model->isValidToken($token);
+
+        if (!$valid_check) {
+            // 토큰이 유효하지 않으면
+            $this->response(['message' => 'invalid token'], 401);
+            return;
+        }
+        // ********************************************
+
+
         $wood_name = $this->input->get('wood_name'); // 수종 이름
         $page = $this->input->get('page'); // 요청 페이지
         $total_count = $this->Memory_model->total_count($wood_name, "", "")->count; // 메모리 전체 개수
@@ -83,6 +126,27 @@ class Memory extends REST_Controller {
      */
     public function gu_list_get()
     {
+        // ********************************************
+        // 토큰 유효 체크
+        $header = $this->input->request_headers();
+        if (!isset($header['Authorization'])) {
+            // 헤더가 잘못되었을 경우
+            $this->response(['message' => 'invalid_request'], 400);
+            return;
+        }
+
+        $token = explode(' ', $header['Authorization'])[1];
+
+        $valid_check = $this->Member_model->isValidToken($token);
+
+        if (!$valid_check) {
+            // 토큰이 유효하지 않으면
+            $this->response(['message' => 'invalid token'], 401);
+            return;
+        }
+        // ********************************************
+
+
         $gu_name = $this->input->get('gu_name'); // 구 이름
         $page = $this->input->get('page'); // 요청 페이지
         $total_count = $this->Memory_model->total_count("", $gu_name, "")->count; // 메모리 전체 개수
@@ -114,6 +178,27 @@ class Memory extends REST_Controller {
      */
     public function theme_list_get()
     {
+        // ********************************************
+        // 토큰 유효 체크
+        $header = $this->input->request_headers();
+        if (!isset($header['Authorization'])) {
+            // 헤더가 잘못되었을 경우
+            $this->response(['message' => 'invalid_request'], 400);
+            return;
+        }
+
+        $token = explode(' ', $header['Authorization'])[1];
+
+        $valid_check = $this->Member_model->isValidToken($token);
+
+        if (!$valid_check) {
+            // 토큰이 유효하지 않으면
+            $this->response(['message' => 'invalid token'], 401);
+            return;
+        }
+        // ********************************************
+
+
         $theme_name = $this->input->get('theme'); // 요청 테마
         $page = $this->input->get('page'); // 요청 페이지
         $total_count = $this->Memory_model->total_count("", "", $theme_name)->count; // 메모리 전체 개수
@@ -152,6 +237,27 @@ class Memory extends REST_Controller {
      */
     public function insert_post()
     {
+        // ********************************************
+        // 토큰 유효 체크
+        $header = $this->input->request_headers();
+        if (!isset($header['Authorization'])) {
+            // 헤더가 잘못되었을 경우
+            $this->response(['message' => 'invalid_request'], 400);
+            return;
+        }
+
+        $token = explode(' ', $header['Authorization'])[1];
+
+        $valid_check = $this->Member_model->isValidToken($token);
+
+        if (!$valid_check) {
+            // 토큰이 유효하지 않으면
+            $this->response(['message' => 'invalid token'], 401);
+            return;
+        }
+        // ********************************************
+
+
         $this->form_validation->set_rules('content', 'Content', 'required'); // 컨텐츠
         $this->form_validation->set_rules('member_id', 'Member', 'required'); // 멤버id
         $this->form_validation->set_rules('wood_name', 'WoodName', 'required'); // 선택 수종
@@ -206,8 +312,7 @@ class Memory extends REST_Controller {
     }
 
     public function test_get() {
-        $result = $this->Memory_model->insert_post([]);
-
-        var_dump($result);
+        $text = 'bearer dskjflkjsdlfkjdslfkjdsfl';
+        var_dump(explode(' ', $text)[1]);
     }
 }
